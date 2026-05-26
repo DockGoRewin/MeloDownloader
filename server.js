@@ -1,5 +1,6 @@
 const express = require("express");
 const axios = require("axios");
+const { spawn } = require("child_process");
 
 const app = express();
 app.use(express.json());
@@ -68,6 +69,45 @@ app.get("/api/download", async (req, res) => {
             error: err.message
         });
     }
+});
+
+app.get("/api/stream", async (req, res) => {
+    const { url } = req.query;
+
+    if (!url || !url.includes("melolostatic.com")) {
+        return res.status(400).json({
+            success: false,
+            message: "URL tidak valid"
+        });
+    }
+
+    res.setHeader("Content-Type", "video/mp4");
+    res.setHeader("Accept-Ranges", "none");
+
+    const ffmpeg = spawn("ffmpeg", [
+        "-i", url,
+        "-vcodec", "libx264",
+        "-preset", "ultrafast",
+        "-crf", "28",
+        "-acodec", "aac",
+        "-f", "mp4",
+        "-movflags", "frag_keyframe+empty_moov",
+        "pipe:1"
+    ]);
+
+    ffmpeg.stdout.pipe(res);
+
+    ffmpeg.stderr.on("data", (data) => {
+        console.error(data.toString());
+    });
+
+    ffmpeg.on("close", (code) => {
+        console.log(`ffmpeg exit: ${code}`);
+    });
+
+    req.on("close", () => {
+        ffmpeg.kill();
+    });
 });
 
 const PORT = process.env.PORT || 3000;
