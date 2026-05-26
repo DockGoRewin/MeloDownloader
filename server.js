@@ -26,6 +26,15 @@ app.get("/api", (req, res) => {
   })
 })
 
+app.get("/api/download", (req, res) => {
+  const url = req.query.url
+
+  res.json({
+    success: true,
+    video: url
+  })
+})
+
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
