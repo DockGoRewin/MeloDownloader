@@ -1,5 +1,29 @@
 const express = require("express");
-const axios = require("axios");
+const response = await axios({
+    method: "GET",
+    url: url,
+    responseType: "stream",
+    maxRedirects: 5,
+    headers: headers
+});
+
+// Tambah header ini
+res.setHeader("Content-Type", "video/mp4");
+res.setHeader("Accept-Ranges", "bytes");
+res.setHeader("Cache-Control", "no-cache");
+
+if (response.headers["content-length"]) {
+    res.setHeader("Content-Length", response.headers["content-length"]);
+}
+
+if (response.headers["content-range"]) {
+    res.setHeader("Content-Range", response.headers["content-range"]);
+    res.status(206); // Partial content
+} else {
+    res.status(200);
+}
+
+response.data.pipe(res);
 
 const app = express();
 
