@@ -27,18 +27,36 @@ app.get("/api/download", async (req, res) => {
     }
 
     try {
+        const headers = {
+            "User-Agent": "AVDML_2.1.242.52-net4_ANDROID,unknown,MDLTaskPreload",
+            "Icy-MetaData": "1",
+            "Connection": "keep-alive"
+        };
+
+        // Forward Range header kalau ada
+        if (req.headers.range) {
+            headers["Range"] = req.headers.range;
+        }
+
         const response = await axios({
             method: "GET",
             url: url,
             responseType: "stream",
-            headers: {
-                "User-Agent": "AVDML_2.1.242.52-net4_ANDROID,unknown,MDLTaskPreload",
-                "Icy-MetaData": "1",
-                "Connection": "keep-alive"
-            }
+            headers: headers
         });
 
-        res.setHeader("Content-Type", "video/mp4");
+        // Forward status dan headers dari CDN
+        res.status(response.status);
+        res.setHeader("Content-Type", response.headers["content-type"] || "video/mp4");
+        res.setHeader("Accept-Ranges", "bytes");
+
+        if (response.headers["content-range"]) {
+            res.setHeader("Content-Range", response.headers["content-range"]);
+        }
+        if (response.headers["content-length"]) {
+            res.setHeader("Content-Length", response.headers["content-length"]);
+        }
+
         response.data.pipe(res);
 
     } catch (err) {
