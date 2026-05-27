@@ -28,10 +28,16 @@ app.get("/api/download", async (req, res) => {
 
     try {
         const headers = {
-            "User-Agent": "AVDML_2.1.242.52-net4_ANDROID,unknown,MDLTaskPreload",
-            "Icy-MetaData": "1",
-            "Connection": "keep-alive"
-        };
+    "User-Agent": "ttplayer(version:2.10.242.150-newcv,appId:-1,os:Android,traceId:1779842037992T23232,appSessionId:LTE3MjU4NDE3MjUxNzc5ODQxOTcyMTA2,tag:ShortPlay),AVDML_2.1.242.52-net4_ANDROID,ShortPlay,MDLTaskPlay",
+    "Accept": "*/*",
+    "Connection": "keep-alive",
+    "Icy-MetaData": "1",
+    "Engine-ID": "9321678",
+    "X-Tt-Fapi": "1",
+    "X-Tt-SubTag": "SeriesPage",
+    "X-Tt-Tag": "ShortPlay",
+    "X-ReqType": "play"
+};
 
         if (req.headers.range) {
             headers["Range"] = req.headers.range;
