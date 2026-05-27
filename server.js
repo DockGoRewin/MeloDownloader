@@ -110,6 +110,24 @@ app.get("/api/stream", async (req, res) => {
     });
 });
 
+const ffmpeg = spawn("ffmpeg", [
+    "-i", url,
+    "-vcodec", "libx264",
+    "-preset", "ultrafast",
+    "-crf", "28",
+    "-acodec", "aac",
+    "-f", "mp4",
+    "-movflags", "frag_keyframe+empty_moov",
+    "pipe:1"
+]);
+
+ffmpeg.on("error", (err) => {
+    console.error("ffmpeg error:", err.message);
+    if (!res.headersSent) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server running di port ${PORT}`);
